@@ -81,7 +81,7 @@ namespace Step4.Controllers
 
 
         [HttpGet]
-        [Route("DummyGetUsers")]
+        [Route("GetUsersFromExternalAPI")]
         public async Task<IActionResult> DummyGetUsers()
         {
             //var users = _userService.GetUsers();   // OK good
@@ -91,6 +91,7 @@ namespace Step4.Controllers
             HttpClient client = new HttpClient();
 
             HttpResponseMessage response = await client.GetAsync("https://dummyjson.com/users");
+            //what does mean which i do't have in my control
 
             ////https://localhost:4356/api/users/getAllusersList - you can do that  - 4 pm.
 
@@ -103,6 +104,79 @@ namespace Step4.Controllers
 
             //    - api to get the users
         }
+
+
+
+        //https://localhost:7259/api/UsersData/GetUsers
+
+        //what i did Last - 10 mins 
+
+        [HttpGet]
+        [Route("GetUsersFromLocalHost")]
+        public async Task<IActionResult> GetUsersFromLocalHost()
+        {
+            //var users = _userService.GetUsers();   // OK good
+
+            // Returns users as JSON with HTTP 200 OK
+
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = await client.GetAsync("https://localhost:7259/api/UsersData/GetUsers");
+            //what does mean which i do't have in my control
+
+            ////https://localhost:4356/api/users/getAllusersList - you can do that  - 4 pm.
+
+            HttpContent content = response.Content;
+
+            string result = await content.ReadAsStringAsync();
+
+            return Content(result, "application/json");
+
+
+            //    - api to get the users
+        }
+
+
+
+
+
+        //from the ________________ 
+        // i need to communicate method i need the UserId=1&UserName=madan these deeal
+        //https://localhost:7259/api/UsersData/GetUsersByQuery?UserId=1&UserName=madan
+
+
+
+        //GetUsersFromLocalHostQuery
+
+        [HttpGet]
+        [Route("GetUsersFromLocalHostQuery")]
+        public async Task<IActionResult> GetUsersFromLocalHostQuery(
+            [FromQuery] int uid , [FromQuery] string uname)
+        {
+            //var users = _userService.GetUsers();   // OK good
+
+            // Returns users as JSON with HTTP 200 OK
+
+            HttpClient client = new HttpClient();
+
+            string url = $"https://localhost:7259/api/UsersData/GetUsersByQuery?UserId={uid}&UserName={uname}";
+
+            HttpResponseMessage response = await client.GetAsync(url);
+            //what does mean which i do't have in my control
+
+            ////https://localhost:4356/api/users/getAllusersList - you can do that  - 4 pm.
+
+            HttpContent content = response.Content;
+
+            string result = await content.ReadAsStringAsync();
+
+            return Content(result, "application/json");
+
+
+            //    - api to get the users
+        }
+
+
 
 
 
