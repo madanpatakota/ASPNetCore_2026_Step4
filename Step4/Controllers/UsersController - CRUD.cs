@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Step4.Models;
 using Step4.Services;
+using System.Net;
+using System.Text;
+using System.Text.Json;
 using static System.Net.WebRequestMethods;
 
 namespace Step4.Controllers
@@ -20,38 +23,125 @@ namespace Step4.Controllers
 
         [HttpPost]
         [Route("CreateUserFromLocalHostAPI")]
-
-        public async Task<IActionResult> CreateUserFromLocalHostAPI(
-            [FromBody] User user)
+        public async Task<IActionResult> CreateUserFromLocalHostAPI()
         {
+            var userDetails = new
+            {
+                Id = 1,
+                FirstName = "Madan"
+            };
 
-            HttpClient client = new HttpClient();
+            string jsonDAta = JsonSerializer.Serialize(userDetails);
 
-
-            //how to create the new user?
-
-            //i want to give my details - hard coded 
-            //var userdetails = new User()
-            //{
-            //    user
-            //};
-
+            StringContent content = new StringContent(jsonDAta,  Encoding.UTF8 ,  "application/json");
 
             string url = "https://localhost:7259/api/UsersData/CreateUser";
 
-            // i need to give the user data
+            HttpClient client = new HttpClient();
 
-            //NY.com -->  register the themselves 
+            HttpResponseMessage response = await client.PostAsync(url, content);
+            
+            string result = await response.Content.ReadAsStringAsync();
 
-            //JSON  Datatype
+            NewUser? nuser = JsonSerializer.Deserialize<NewUser>(result); 
 
-            //home work 
-
-
-
-
-
+            // you can write code for nuser
+            return Content(result, "application/json");
 
         }
+
+
+
+        [HttpPut]
+        [Route("UpdateUserFromLocalHostAPI")]
+        public async Task<IActionResult> UpdateUserFromLocalHostAPI()
+        {
+            var userDetails = new
+            {
+                Id = 1,
+                FirstName = "Madan"
+            };
+
+            var UserID = 1;
+
+            string jsonDAta = JsonSerializer.Serialize(userDetails);
+
+            StringContent content = new StringContent(jsonDAta, Encoding.UTF8, "application/json");
+
+            string url = $"https://localhost:7259/api/UsersData/UpdateUser?UserId={UserID}";
+
+            HttpClient client = new HttpClient();
+
+            client.DefaultRequestHeaders.Add("ApiKey", "MISARD123");
+
+            HttpResponseMessage response = await client.PutAsync(url, content);
+
+            string result = await response.Content.ReadAsStringAsync();
+
+            HttpStatusCode code =  response.StatusCode;   //201 , 200 , 500 , 401 ,
+
+            int code1 = (int)response.StatusCode;         //type converstion
+
+            NewUser? nuser = JsonSerializer.Deserialize<NewUser>(result);
+
+            // you can write code for nuser
+            return Content(result, "application/json");
+        }
+
+
+
+
+        // Calls another Web API to delete a user based on UserId
+        [HttpDelete]
+        [Route("UpdateDeleteFromLocalHostAPI")]
+        public async Task<IActionResult> DeleteUserFromLocalHostAPI(
+            [FromQuery] int UserId)
+        {
+            // Create HttpClient
+            using HttpClient client = new HttpClient();
+
+            // Prepare API URL with query parameter
+            string url = $"https://localhost:7002/api/Users/DeleteUser?UserId={UserId}";
+
+            // Add authentication key to HTTP request headers
+            client.DefaultRequestHeaders.Add("ApiKey", "MISARD123");
+
+            // Send DELETE request to another Web API
+            using HttpResponseMessage response =
+                await client.DeleteAsync(url);
+
+            // Read response content as string
+            string result =
+                await response.Content.ReadAsStringAsync();
+
+            // Return error if the API request fails
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode((int)response.StatusCode, result);
+            }
+
+            // Set the HTTP status code received from the Users API
+            Response.StatusCode = (int)response.StatusCode;
+
+            // Return JSON text to the client
+            return Content(result, "application/json");
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 }
